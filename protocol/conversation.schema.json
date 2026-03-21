@@ -2,14 +2,20 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/aichatlog/aichatlog/protocol/conversation.schema.json",
   "title": "ConversationObject",
-  "description": "AIChatLog v1 conversation transport protocol. Any tool producing this format can integrate with the aichatlog-server.",
+  "description": "AIChatLog conversation transport protocol. v1 sends full payload; v2 adds conditional sync (check/delta/full modes).",
   "type": "object",
-  "required": ["version", "source", "session_id", "title", "date", "messages"],
+  "required": ["version", "source", "session_id", "title", "date"],
   "properties": {
     "version": {
       "type": "integer",
-      "const": 1,
-      "description": "Protocol version. Currently 1."
+      "enum": [1, 2],
+      "description": "Protocol version. v1: always full payload with messages required. v2: conditional sync with sync_mode."
+    },
+    "sync_mode": {
+      "type": "string",
+      "enum": ["full", "delta", "check"],
+      "description": "v2 only. 'full': send all messages. 'delta': send messages from delta_from_seq onward. 'check': metadata only, no messages.",
+      "default": "full"
     },
     "source": {
       "type": "string",
@@ -64,9 +70,19 @@
       "type": "string",
       "description": "Hash of message contents for change detection. Used by the server to detect updates vs duplicates."
     },
+    "has_code": {
+      "type": "boolean",
+      "description": "v2 only. Whether any message contains code blocks (triple backticks). Plugin computes this to avoid server-side duplication.",
+      "default": false
+    },
+    "delta_from_seq": {
+      "type": "integer",
+      "description": "v2 delta mode only. Messages in the payload start at this seq number. Server deletes messages with seq >= this value and inserts the new ones.",
+      "minimum": 0
+    },
     "messages": {
       "type": "array",
-      "description": "Ordered list of conversation messages.",
+      "description": "Ordered list of conversation messages. Required for v1 and v2 full/delta modes. Omitted in v2 check mode.",
       "items": {
         "$ref": "#/$defs/Message"
       },

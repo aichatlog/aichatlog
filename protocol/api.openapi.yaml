@@ -118,6 +118,30 @@ paths:
                 items:
                   $ref: "#/components/schemas/ConversationRow"
 
+  /api/conversations/sync:
+    post:
+      summary: Conditional sync (v2 protocol)
+      description: |
+        Smart sync endpoint that minimizes bandwidth. Supports three modes:
+        - `check`: Metadata only (~500 bytes). Server compares content_hash and returns unchanged or need_full.
+        - `delta`: Metadata + only new messages (from delta_from_seq onward). Server appends to existing conversation.
+        - `full`: Complete payload with all messages. Same as POST /api/conversations but with v2 response format.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "conversation.schema.json"
+      responses:
+        "200":
+          description: Sync result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
   /api/conversations/batch:
     post:
       summary: Batch ingest conversations
@@ -278,6 +302,28 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/MessageRow"
+
+    SyncResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        action:
+          type: string
+          enum: [created, updated, unchanged, need_full]
+          description: |
+            What the server did:
+            - created: new conversation stored
+            - updated: existing conversation updated
+            - unchanged: content_hash matched, no action taken
+            - need_full: server needs full payload (retry with sync_mode=full)
+        session_id:
+          type: string
+        server_hash:
+          type: string
+          description: The content_hash the server has on file
+        server_message_count:
+          type: integer
 
     Stats:
       type: object
