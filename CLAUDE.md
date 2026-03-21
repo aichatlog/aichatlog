@@ -6,10 +6,17 @@ Monorepo for AIChatLog — an open-source platform that captures AI conversation
 
 ```
 server/                          # Go REST API server
-  cmd/server/main.go             # Entry point, flag parsing
-  internal/api/handler.go        # HTTP handler, routing, auth, CORS
-  internal/storage/sqlite.go     # SQLite store, schema, queries
-  Dockerfile, docker-compose.yml # Docker deployment
+  cmd/server/main.go             # Entry point, flag parsing, embed dashboard
+  internal/api/handler.go        # HTTP handler, routing, auth, CORS, dashboard
+  internal/storage/sqlite.go     # SQLite store (6 tables + FTS5), migrations
+  web/dashboard.html             # Embedded web dashboard (vanilla JS)
+  web/embed.go                   # Go embed for dashboard.html
+  Dockerfile, docker-compose.yml # Docker deployment (FTS5 enabled)
+
+protocol/                        # ConversationObject v1 specification
+  conversation.schema.json       # JSON Schema
+  api.openapi.yaml               # OpenAPI 3.1 spec for server API
+  examples/                      # Sample conversations (claude-code, chatgpt)
 
 plugins/claude-code/             # Claude Code capture plugin (Python)
   .claude-plugin/                # Plugin distribution
@@ -30,8 +37,8 @@ docs/                            # Product design documents
 ## Build & Test
 
 ```bash
-# Server
-cd server && go build -o aichatlog-server ./cmd/server
+# Server (FTS5 required)
+cd server && CGO_CFLAGS="-DSQLITE_ENABLE_FTS5" go build -o aichatlog-server ./cmd/server
 
 # Plugin syntax check
 python3 -c "import ast; ast.parse(open('plugins/claude-code/.claude-plugin/scripts/aichatlog.py').read())"
@@ -46,9 +53,14 @@ aichatlog status
 ### Server (Go)
 - Single dependency: `github.com/mattn/go-sqlite3`
 - Module path: `github.com/aichatlog/aichatlog/server`
+- Build requires: `CGO_CFLAGS="-DSQLITE_ENABLE_FTS5"` for full-text search
 - Env vars: `AICHATLOG_PORT`, `AICHATLOG_DB`, `AICHATLOG_DATA`, `AICHATLOG_TOKEN`
 - Error handling: `(result, error)` tuples, wrap with `fmt.Errorf`
 - SQL: dynamic query building with `?` placeholders
+- Database: 6 tables (conversations, messages, tags, extractions, output_sync, process_queue) + FTS5
+- Migration: numbered migrations via `schema_version` table
+- Dedup key: `UNIQUE(source_type, device, session_id)`
+- Dashboard: embedded via Go `embed` from `server/web/dashboard.html`
 
 ### Plugin (Python)
 - **Zero external deps** in aichatlog.py — stdlib only
@@ -67,5 +79,7 @@ All inherit from `OutputAdapter` with `write_note(path, content)` and `test_conn
 - **ServerAdapter** — POST ConversationObject to aichatlog-server
 
 ### ConversationObject Protocol
-Transport format between plugins and server. `source` field identifies the AI tool origin.
-Any tool producing this JSON can integrate with the server.
+Transport format between plugins and server. Defined in `protocol/conversation.schema.json`.
+- `source` field identifies the AI tool origin (e.g. `claude-code`, `chatgpt`)
+- Server deduplicates by `(source_type, device, session_id)` + `content_hash`
+- Any tool producing this JSON can integrate with the server
