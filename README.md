@@ -158,29 +158,49 @@ aichatlog/
 
 | Version | Focus | Status |
 | --- | --- | --- |
-| **v0.5** | Plugin: 4 adapters, web dashboard, auto-capture | ✅ Current |
-| **v0.6** | Protocol spec, server storage refactor (6 tables + FTS5) | 🔜 Next |
-| **v0.7** | Server output adapters + processing pipeline | Planned |
-| **v0.8** | LLM knowledge extraction (tech solutions, concepts, prompts) | Planned |
-| **v0.9** | MCP Server + React Web UI | Planned |
-| **v1.0** | Docs, CI/CD, stability, Notion adapter | Planned |
+| **v0.5** | Plugin: 4 adapters, web dashboard, auto-capture | ✅ Done |
+| **v0.6** | Protocol spec, server storage refactor (6 tables + FTS5) | ✅ Done |
+| **v0.7** | Server output adapters, processing pipeline, v2 conditional sync | ✅ Done |
+| **v0.8** | LLM knowledge extraction (Anthropic/OpenAI, atomic notes) | ✅ Done |
+| **v0.9** | MCP Server, full metadata capture (model/timestamps/tokens) | ✅ Done |
+| **v1.0** | Docs, CI/CD, CONTRIBUTING.md, stability | ✅ Current |
 
-**Post-v1.0:** Ollama adapter (fully offline), ChatGPT browser extension, weekly summaries, knowledge graph.
+**Post-v1.0:** Ollama adapter (fully offline), ChatGPT browser extension, weekly summaries, knowledge graph, Notion adapter.
+
+## MCP Integration
+
+Connect Claude Code to your conversation history via the MCP server:
+
+```json
+{
+  "mcpServers": {
+    "aichatlog": {
+      "command": "aichatlog-server",
+      "args": ["mcp", "--db", "/path/to/aichatlog.db"]
+    }
+  }
+}
+```
+
+Available tools: `search_conversations`, `get_conversation`, `get_project_context`, `get_recent_work_log`.
 
 ## Documentation
 
 - [Product Design](docs/product-design.md) — Full architecture, data model, API spec, and vision
 - [Knowledge Extraction](docs/knowledge-extraction.md) — LLM extraction pipeline and prompt design
 - [Project Organization](docs/project-organization.md) — Repo structure, labels, CI/CD, phasing
+- [Protocol Spec](protocol/README.md) — ConversationObject v1/v2 JSON Schema and API spec
 - [Server README](server/README.md) — API reference and deployment guide
 - [Plugin README](plugins/claude-code/README.md) — Installation and CLI commands
+- [Contributing](CONTRIBUTING.md) — How to add adapters, plugins, and contribute
 
 ## Contributing
 
-AIChatLog is in active early development. Contributions are welcome — especially:
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, code conventions, and how to add adapters/plugins.
 
-- **New output adapters** (Notion, Logseq, Webhook, etc.)
+- **New output adapters** (Notion, Logseq, etc.)
 - **New input plugins** (ChatGPT, Claude.ai, Copilot)
+- **New LLM adapters** (Ollama, Groq, etc.)
 - **Bug reports and feature requests** via [GitHub Issues](https://github.com/aichatlog/aichatlog/issues)
 
 ## License

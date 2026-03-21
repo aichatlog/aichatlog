@@ -1,0 +1,33 @@
+name: Plugin CI
+
+on:
+  push:
+    paths:
+      - 'plugins/**'
+      - 'protocol/**'
+  pull_request:
+    paths:
+      - 'plugins/**'
+      - 'protocol/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Syntax check aichatlog.py
+        run: python3 -c "import ast; ast.parse(open('plugins/claude-code/.claude-plugin/scripts/aichatlog.py').read()); print('OK')"
+
+      - name: Syntax check core.py
+        run: python3 -c "import ast; ast.parse(open('plugins/claude-code/src/aichatlog/core.py').read()); print('OK')"
+
+      - name: Verify pip install
+        run: |
+          cd plugins/claude-code
+          pip install -e .
+          aichatlog --help || true

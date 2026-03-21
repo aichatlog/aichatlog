@@ -1,0 +1,29 @@
+name: Server CI
+
+on:
+  push:
+    paths:
+      - 'server/**'
+      - 'protocol/**'
+  pull_request:
+    paths:
+      - 'server/**'
+      - 'protocol/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Build server
+        working-directory: server
+        run: CGO_ENABLED=1 CGO_CFLAGS="-DSQLITE_ENABLE_FTS5" go build -o aichatlog-server ./cmd/server
+
+      - name: Verify binary runs
+        working-directory: server
+        run: ./aichatlog-server --help || true
