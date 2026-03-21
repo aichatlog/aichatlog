@@ -1,0 +1,334 @@
+openapi: 3.1.0
+info:
+  title: AIChatLog Server API
+  description: REST API for ingesting, querying, and managing AI conversation logs.
+  version: 0.6.0
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      security: []
+      responses:
+        "200":
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  service:
+                    type: string
+                    example: aichatlog-server
+
+  /api/conversations:
+    post:
+      summary: Ingest a single conversation
+      description: Receives a ConversationObject and stores it. Deduplicates by (source_type, device, session_id).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "conversation.schema.json"
+      responses:
+        "200":
+          description: Conversation accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  session_id:
+                    type: string
+                  message:
+                    type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    get:
+      summary: List conversations
+      parameters:
+        - name: q
+          in: query
+          description: Full-text search query (FTS5)
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [received, synced, failed, ignored]
+        - name: project
+          in: query
+          schema:
+            type: string
+        - name: source
+          in: query
+          description: Filter by source_type
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [started_at, title, project, word_count, message_count, created_at]
+            default: started_at
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 200
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ConversationRow"
+
+  /api/conversations/batch:
+    post:
+      summary: Batch ingest conversations
+      description: Receives an array of ConversationObjects.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "conversation.schema.json"
+      responses:
+        "200":
+          description: Batch accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  count:
+                    type: integer
+
+  /api/conversations/{id}:
+    get:
+      summary: Get a single conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Conversation ID or session_id
+          schema:
+            type: string
+        - name: full
+          in: query
+          description: If "true", include messages in the response
+          schema:
+            type: string
+            enum: ["true", "false"]
+            default: "false"
+      responses:
+        "200":
+          description: Conversation detail
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ConversationRow"
+                  - $ref: "#/components/schemas/ConversationDetail"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/conversations/{id}/messages:
+    get:
+      summary: Get messages for a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Conversation ID or session_id
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ordered list of messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MessageRow"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/stats:
+    get:
+      summary: Conversation counts by status
+      responses:
+        "200":
+          description: Status counts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stats"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Optional bearer token. Set via --token flag or AICHATLOG_TOKEN env var.
+
+  schemas:
+    ConversationRow:
+      type: object
+      properties:
+        id:
+          type: string
+        session_id:
+          type: string
+        source_type:
+          type: string
+        device:
+          type: string
+        title:
+          type: string
+        project:
+          type: string
+        project_path:
+          type: string
+        model:
+          type: string
+        started_at:
+          type: string
+        word_count:
+          type: integer
+        message_count:
+          type: integer
+        content_hash:
+          type: string
+        has_code:
+          type: boolean
+        status:
+          type: string
+          enum: [received, synced, failed, ignored]
+        created_at:
+          type: string
+        updated_at:
+          type: string
+
+    MessageRow:
+      type: object
+      properties:
+        id:
+          type: integer
+        conversation_id:
+          type: string
+        role:
+          type: string
+          enum: [user, assistant, system]
+        content:
+          type: string
+        timestamp:
+          type: string
+        seq:
+          type: integer
+        is_context:
+          type: boolean
+
+    ConversationDetail:
+      allOf:
+        - $ref: "#/components/schemas/ConversationRow"
+        - type: object
+          properties:
+            messages:
+              type: array
+              items:
+                $ref: "#/components/schemas/MessageRow"
+
+    Stats:
+      type: object
+      properties:
+        received:
+          type: integer
+        synced:
+          type: integer
+        failed:
+          type: integer
+        ignored:
+          type: integer
+        total:
+          type: integer
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              ok:
+                type: boolean
+                example: false
+              error:
+                type: string
+    Unauthorized:
+      description: Missing or invalid bearer token
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              ok:
+                type: boolean
+                example: false
+              error:
+                type: string
+                example: Unauthorized
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              ok:
+                type: boolean
+                example: false
+              error:
+                type: string
+                example: Not found

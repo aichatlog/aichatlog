@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/aichatlog/aichatlog/protocol/conversation.schema.json",
+  "title": "ConversationObject",
+  "description": "AIChatLog v1 conversation transport protocol. Any tool producing this format can integrate with the aichatlog-server.",
+  "type": "object",
+  "required": ["version", "source", "session_id", "title", "date", "messages"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Protocol version. Currently 1."
+    },
+    "source": {
+      "type": "string",
+      "description": "AI tool origin identifier.",
+      "examples": ["claude-code", "chatgpt", "claude-ai", "copilot"]
+    },
+    "device": {
+      "type": "string",
+      "description": "Device name for multi-device deduplication.",
+      "default": ""
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Unique conversation identifier from the source tool."
+    },
+    "title": {
+      "type": "string",
+      "description": "Conversation title. Typically derived from the first user message."
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Conversation date in YYYY-MM-DD format."
+    },
+    "project": {
+      "type": "string",
+      "description": "Project name (typically the working directory basename).",
+      "default": ""
+    },
+    "project_path": {
+      "type": "string",
+      "description": "Full path to the project directory.",
+      "default": ""
+    },
+    "model": {
+      "type": "string",
+      "description": "AI model used in the conversation.",
+      "default": "",
+      "examples": ["claude-sonnet-4", "gpt-4o", "claude-opus-4"]
+    },
+    "message_count": {
+      "type": "integer",
+      "description": "Total number of messages.",
+      "minimum": 0
+    },
+    "word_count": {
+      "type": "integer",
+      "description": "Total word count across all messages.",
+      "minimum": 0
+    },
+    "content_hash": {
+      "type": "string",
+      "description": "Hash of message contents for change detection. Used by the server to detect updates vs duplicates."
+    },
+    "messages": {
+      "type": "array",
+      "description": "Ordered list of conversation messages.",
+      "items": {
+        "$ref": "#/$defs/Message"
+      },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "Message": {
+      "type": "object",
+      "required": ["role", "content", "seq"],
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": ["user", "assistant", "system"],
+          "description": "Message author role."
+        },
+        "content": {
+          "type": "string",
+          "description": "Full message content (may include markdown, code blocks, etc.)."
+        },
+        "time_str": {
+          "type": "string",
+          "description": "Message timestamp as a display string (e.g. '14:30' or '14:30:22').",
+          "default": ""
+        },
+        "is_context": {
+          "type": "boolean",
+          "description": "If true, this message is injected context (e.g. file contents), not a real conversation turn.",
+          "default": false
+        },
+        "seq": {
+          "type": "integer",
+          "description": "Zero-based sequence number defining message order.",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

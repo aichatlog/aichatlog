@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "source": "claude-code",
+  "device": "macbook-pro",
+  "session_id": "01jq8kf2m3n4p5q6r7s8t9u0v1",
+  "title": "Fix token refresh race condition",
+  "date": "2026-03-20",
+  "project": "auth-service",
+  "project_path": "/Users/developer/code/auth-service",
+  "model": "claude-sonnet-4",
+  "message_count": 4,
+  "word_count": 320,
+  "content_hash": "a3f8e2d1c4b5a6f7e8d9c0b1a2f3e4d5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "There's a race condition in our token refresh logic. When multiple requests hit the /refresh endpoint simultaneously, we sometimes get duplicate tokens. How do I fix this?",
+      "time_str": "14:30:22",
+      "is_context": false,
+      "seq": 0
+    },
+    {
+      "role": "assistant",
+      "content": "The issue is that multiple goroutines are checking the token expiry and refreshing concurrently. You can fix this with a `sync.Mutex` or `singleflight.Group`.\n\nHere's the recommended approach using `singleflight`:\n\n```go\nvar refreshGroup singleflight.Group\n\nfunc RefreshToken(ctx context.Context) (*Token, error) {\n    v, err, _ := refreshGroup.Do(\"refresh\", func() (interface{}, error) {\n        return doRefresh(ctx)\n    })\n    if err != nil {\n        return nil, err\n    }\n    return v.(*Token), nil\n}\n```\n\nThis ensures only one refresh executes at a time, and all concurrent callers share the result.",
+      "time_str": "14:30:35",
+      "is_context": false,
+      "seq": 1
+    },
+    {
+      "role": "user",
+      "content": "That works! But what about the case where the token expires between the singleflight check and the actual API call?",
+      "time_str": "14:32:10",
+      "is_context": false,
+      "seq": 2
+    },
+    {
+      "role": "assistant",
+      "content": "Good catch. Add a retry wrapper that detects 401 responses and triggers a fresh refresh:\n\n```go\nfunc CallWithRetry(ctx context.Context, fn func(token string) error) error {\n    token, err := GetCachedToken(ctx)\n    if err != nil {\n        return err\n    }\n    err = fn(token)\n    if isUnauthorized(err) {\n        token, err = RefreshToken(ctx)\n        if err != nil {\n            return err\n        }\n        return fn(token)\n    }\n    return err\n}\n```\n\nThis gives you exactly-once refresh semantics with automatic retry.",
+      "time_str": "14:32:28",
+      "is_context": false,
+      "seq": 3
+    }
+  ]
+}

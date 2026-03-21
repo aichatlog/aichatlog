@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "source": "chatgpt",
+  "device": "chrome-desktop",
+  "session_id": "chatcmpl-abc123def456",
+  "title": "Explain Python asyncio event loop",
+  "date": "2026-03-21",
+  "project": "",
+  "project_path": "",
+  "model": "gpt-4o",
+  "message_count": 2,
+  "word_count": 180,
+  "content_hash": "b4e9f3a2d1c5b6a7e8f9d0c1b2a3e4f5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Can you explain how Python's asyncio event loop works under the hood?",
+      "time_str": "09:15:00",
+      "is_context": false,
+      "seq": 0
+    },
+    {
+      "role": "assistant",
+      "content": "Python's asyncio event loop is a single-threaded concurrency mechanism based on coroutines.\n\n**Core concept:** The event loop maintains a queue of tasks (coroutines). It runs each task until it hits an `await`, then switches to the next ready task.\n\n**Under the hood:**\n1. `loop.run_forever()` enters an infinite loop calling `_run_once()`\n2. `_run_once()` checks the selector (epoll/kqueue) for I/O readiness\n3. Ready callbacks are moved from `_scheduled` to `_ready` queue\n4. Each callback in `_ready` is executed via `handle._run()`\n5. When a coroutine awaits, it registers a callback and yields control\n\nThe key insight: there's no parallelism — just cooperative scheduling. Tasks voluntarily yield at `await` points, and the loop picks the next ready task.",
+      "time_str": "09:15:12",
+      "is_context": false,
+      "seq": 1
+    }
+  ]
+}
