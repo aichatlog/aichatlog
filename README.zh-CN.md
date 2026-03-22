@@ -55,7 +55,7 @@ Claude Code (台式机) ─┤→ aichatlog-server → Obsidian / 本地 / Git /
 
 ```bash
 # 安装
-pip install git+https://github.com/aichatlog/aichatlog.git#subdirectory=plugins/claude-code
+pip3 install git+https://github.com/aichatlog/aichatlog.git#subdirectory=plugins/claude-code
 
 # 注册 Claude Code hook + 配置输出适配器
 aichatlog install
@@ -83,7 +83,7 @@ cd server && go build -o aichatlog-server ./cmd/server
 ./aichatlog-server --port 8080 --token your-secret-token
 
 # 2. 安装插件并指向服务器
-pip install git+https://github.com/aichatlog/aichatlog.git#subdirectory=plugins/claude-code
+pip3 install git+https://github.com/aichatlog/aichatlog.git#subdirectory=plugins/claude-code
 aichatlog install
 aichatlog setup --adapter server --url http://localhost:8080 --token your-secret-token
 ```

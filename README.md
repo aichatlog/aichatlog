@@ -55,7 +55,7 @@ Claude Code (desktop) ─┤→ aichatlog-server → Obsidian / Local / Git / We
 
 ```bash
 # Install
-pip install git+https://github.com/aichatlog/aichatlog.git#subdirectory=plugins/claude-code
+pip3 install git+https://github.com/aichatlog/aichatlog.git#subdirectory=plugins/claude-code
 
 # Register the Claude Code hook + configure output adapter
 aichatlog install
@@ -83,7 +83,7 @@ cd server && go build -o aichatlog-server ./cmd/server
 ./aichatlog-server --port 8080 --token your-secret-token
 
 # 2. Install plugin and point it to the server
-pip install git+https://github.com/aichatlog/aichatlog.git#subdirectory=plugins/claude-code
+pip3 install git+https://github.com/aichatlog/aichatlog.git#subdirectory=plugins/claude-code
 aichatlog install
 aichatlog setup --adapter server --url http://localhost:8080 --token your-secret-token
 ```
