@@ -1,5 +1,7 @@
 # ConversationObject Protocol v1
 
+English | [简体中文](README.zh-CN.md)
+
 The ConversationObject is the open transport format used between input plugins and the aichatlog-server. Any tool that produces this JSON format can integrate with AIChatLog.
 
 ## Schema

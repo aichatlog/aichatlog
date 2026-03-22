@@ -1,5 +1,7 @@
 # Contributing to AIChatLog
 
+English | [简体中文](CONTRIBUTING.zh-CN.md)
+
 Thanks for your interest in contributing! AIChatLog is in active early development and welcomes contributions.
 
 ## Getting Started
@@ -39,7 +41,7 @@ python3 -c "import ast; ast.parse(open('plugins/claude-code/.claude-plugin/scrip
 
 ## Project Structure
 
-```
+```text
 server/                     Go REST API + MCP server
   internal/api/             HTTP handlers
   internal/storage/         SQLite storage (6 tables + FTS5)
@@ -84,17 +86,20 @@ protocol/                   ConversationObject v1/v2 spec
 ## Code Conventions
 
 ### Server (Go)
+
 - Single external dependency: `github.com/mattn/go-sqlite3`
 - Build requires: `CGO_CFLAGS="-DSQLITE_ENABLE_FTS5"`
 - Error handling: `(result, error)` tuples, wrap with `fmt.Errorf`
 - Database migrations: numbered in `migrate()`, one function per version
 
 ### Plugin (Python)
+
 - **Zero external deps** — stdlib only in `aichatlog.py`
 - `aichatlog.py` and `core.py` must stay in sync (`core.py` = `aichatlog.py` + install/uninstall)
 - Function prefixes: `cmd_`, `db_`, `cfg_`, `parse_`, `format_`, `sync_`, `ingest_`
 
 ### Protocol
+
 - ConversationObject v1: full payload, always includes messages
 - ConversationObject v2: conditional sync (check/delta/full modes)
 - Universal fields are top-level; source-specific data goes in `metadata` dict
@@ -110,7 +115,7 @@ protocol/                   ConversationObject v1/v2 spec
 
 For external repos/packages:
 
-```
+```text
 aichatlog-plugin-{source}     # Input plugins (e.g. aichatlog-plugin-chatgpt)
 aichatlog-adapter-{dest}      # Output adapters (e.g. aichatlog-adapter-notion)
 aichatlog-template-{use-case} # Note templates

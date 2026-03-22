@@ -1,5 +1,7 @@
 # AIChatLog
 
+English | [简体中文](README.zh-CN.md)
+
 **Log your AI conversations. Keep the knowledge.**
 
 AIChatLog is an open-source, self-hosted platform that captures AI conversations from any source, stores them in a central database, and syncs them to your knowledge base.
