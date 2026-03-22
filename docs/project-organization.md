@@ -13,7 +13,7 @@
 ```
 aichatlog/
 ├── README.md
-├── LICENSE (MIT)
+├── LICENSE (AGPL-3.0)
 ├── CONTRIBUTING.md
 ├── CHANGELOG.md
 │

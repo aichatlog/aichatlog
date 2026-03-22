@@ -41,7 +41,7 @@ python3 -c "import ast; ast.parse(open('plugins/claude-code/.claude-plugin/scrip
 
 ## 项目结构
 
-```
+```text
 server/                     Go REST API + MCP 服务器
   internal/api/             HTTP 处理器
   internal/storage/         SQLite 存储 (6 表 + FTS5)
@@ -115,7 +115,7 @@ protocol/                   ConversationObject v1/v2 规范
 
 外部仓库/包的命名：
 
-```
+```text
 aichatlog-plugin-{source}     # 输入插件 (如 aichatlog-plugin-chatgpt)
 aichatlog-adapter-{dest}      # 输出适配器 (如 aichatlog-adapter-notion)
 aichatlog-template-{use-case} # 笔记模板
@@ -123,4 +123,4 @@ aichatlog-template-{use-case} # 笔记模板
 
 ## 许可证
 
-MIT — 参见 [LICENSE](LICENSE)。
+AGPL-3.0 — 参见 [LICENSE](LICENSE)。

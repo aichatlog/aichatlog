@@ -207,4 +207,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, code conventions, and how to a
 
 ## License
 
-[MIT](LICENSE)
+[AGPL-3.0](LICENSE)

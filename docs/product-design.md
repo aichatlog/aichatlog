@@ -496,7 +496,7 @@ github.com/aichatlog/aichatlog
 │   └── examples/
 ├── docs/
 ├── README.md
-├── LICENSE (MIT)
+├── LICENSE (AGPL-3.0)
 └── CONTRIBUTING.md
 ```
 
