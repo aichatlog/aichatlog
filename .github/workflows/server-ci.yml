@@ -22,7 +22,7 @@ jobs:
 
       - name: Build server
         working-directory: server
-        run: CGO_ENABLED=1 CGO_CFLAGS="-DSQLITE_ENABLE_FTS5" go build -o aichatlog-server ./cmd/server
+        run: CGO_ENABLED=1 CGO_CFLAGS="-DSQLITE_ENABLE_FTS5" CGO_LDFLAGS="-lm" go build -o aichatlog-server ./cmd/server
 
       - name: Verify binary runs
         working-directory: server

@@ -21,7 +21,7 @@ jobs:
 
       - name: Build server binary (linux/amd64)
         working-directory: server
-        run: CGO_ENABLED=1 CGO_CFLAGS="-DSQLITE_ENABLE_FTS5" go build -ldflags="-s -w" -o aichatlog-server ./cmd/server
+        run: CGO_ENABLED=1 CGO_CFLAGS="-DSQLITE_ENABLE_FTS5" CGO_LDFLAGS="-lm" go build -ldflags="-s -w" -o aichatlog-server ./cmd/server
 
       - name: Upload binary artifact
         uses: actions/upload-artifact@v4
