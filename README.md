@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/aichatlog-logo.svg" width="128" height="128" alt="AIChatLog Logo">
+</p>
+
 # AIChatLog
 
 English | [简体中文](README.zh-CN.md)

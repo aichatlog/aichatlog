@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/aichatlog-logo.svg" width="128" height="128" alt="AIChatLog Logo">
+</p>
+
 # AIChatLog
 
 **记录你的 AI 对话，留住知识。**
