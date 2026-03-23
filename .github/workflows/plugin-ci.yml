@@ -5,10 +5,12 @@ on:
     paths:
       - 'plugins/**'
       - 'protocol/**'
+      - '.github/workflows/plugin-ci.yml'
   pull_request:
     paths:
       - 'plugins/**'
       - 'protocol/**'
+      - '.github/workflows/plugin-ci.yml'
 
 jobs:
   validate:
